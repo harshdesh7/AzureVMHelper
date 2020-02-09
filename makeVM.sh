@@ -12,6 +12,7 @@ done
 
 echo $RG
 echo $PORTS
+echo $DELETE
 
 #az login
 
