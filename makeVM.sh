@@ -10,16 +10,38 @@ while getopts "g:n:i:p:d" arg; do
 	esac
 done
 
-echo $RG
-echo $PORTS
-echo $DELETE
 
-#az login
+#echo $RG
+#echo $PORTS
+#echo $DELETE
 
-#if [ "$DELETE" = true ] && [ -n $RG ] ; then
-	#az group delete --name $RG
-#else
-	#az group create --name $RG --location westus
-	#az vm create -n $NAME -g $RG --image $IMAGE
-	#az vm open-port --port $PORTS --resource-group $RG --name $NAME
-#fi
+
+#Code below should be able to set up basic VM on Azure
+
+if [ -z $IMAGE ] ; then 
+	IMAGE="UbuntuLTS"
+fi
+
+az login
+
+if [ "$DELETE" = true ] && [ -n $RG ] ; then
+	echo "Deleting resource group"
+	az group delete --name $RG
+else
+	if [ -z $RG ] || [ -z $NAME ] ; then
+		echo "Not enough info to create a vm"
+		exit 1
+	fi
+	az group create --name $RG --location westus
+	echo "Resource group created"
+	az vm create -n $NAME -g $RG --image $IMAGE
+	echo "Virtual machine made"
+	if [[ -n ${PORTS} ]] ; then
+		IFS=' ' read -ra port_nums <<< "$PORTS"
+		for i in "${port_nums[@]}"
+		do
+			az vm open-port --port $i --resource-group $RG --name $NAME
+		done
+		echo "Ports opened"
+	fi
+fi
