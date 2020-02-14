@@ -36,6 +36,10 @@ else
 	echo "Resource group created"
 	az vm create -n $NAME -g $RG --image $IMAGE
 	echo "Virtual machine made"
+	len=$(az vm list -g $RG | jq '. | length')
+	index=$(( len - 1 ))
+	ip=$(az vm list-ip-addresses -g BruhGroup | jq -r --arg index $index '.[$index|tonumber] | .virtualMachine.network.publicIpAddresses[0].ipAddress')
+	echo "IP Address of VM is: ${ip}"
 	if [[ -n ${PORTS} ]] ; then
 		IFS=' ' read -ra port_nums <<< "$PORTS"
 		for i in "${port_nums[@]}"
