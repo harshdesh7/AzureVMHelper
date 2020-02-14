@@ -38,6 +38,7 @@ else
 	echo "Virtual machine made"
 	len=$(az vm list -g $RG | jq '. | length')
 	index=$(( len - 1 ))
+	#fix indexing (finding where VM == name)
 	ip=$(az vm list-ip-addresses -g BruhGroup | jq -r --arg index $index '.[$index|tonumber] | .virtualMachine.network.publicIpAddresses[0].ipAddress')
 	echo "IP Address of VM is: ${ip}"
 	if [[ -n ${PORTS} ]] ; then
