@@ -34,10 +34,8 @@ else
 	fi
 	az group create --name $RG --location westus
 	echo "Resource group created"
-	az vm create -n $NAME -g $RG --image $IMAGE
+	az vm create -n $NAME -g $RG --image $IMAGE || exit 1
 	echo "Virtual machine made"
-	len=$(az vm list -g $RG | jq '. | length')
-	index=$(( len - 1 ))
 	ip=$(az vm list-ip-addresses -g $RG -n $NAME | jq '.[0].virtualMachine.network.publicIpAddresses[0].ipAddress')
 	echo "IP Address of VM is: ${ip}"
 	if [[ -n ${PORTS} ]] ; then
