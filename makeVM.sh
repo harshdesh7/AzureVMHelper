@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 while getopts "g:n:i:p:d" arg; do 
 	case $arg in
