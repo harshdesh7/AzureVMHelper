@@ -11,11 +11,6 @@ while getopts "g:n:i:p:d" arg; do
 done
 
 
-#echo $RG
-#echo $PORTS
-#echo $DELETE
-
-
 #Code below should be able to set up basic VM on Azure
 
 if [ -z $IMAGE ] ; then 
@@ -34,10 +29,15 @@ else
 	fi
 	az group create --name $RG --location westus
 	echo "Resource group created"
-	az vm create -n $NAME -g $RG --image $IMAGE || exit 1
+	if [ ! -d "~/.ssh" ] || [ -z "$(ls -A ~/.ssh)" ] ; then
+		echo "generating SSH keys"
+		az vm create -n $NAME -g $RG --admin-username "adminsh" --image $IMAGE --generate-ssh-keys || exit 1
+	else
+		az vm create -n $NAME -g $RG --admin-username "adminsh" --image $IMAGE || exit 1
+	fi
 	echo "Virtual machine made"
 	ip=$(az vm list-ip-addresses -g $RG -n $NAME | jq '.[0].virtualMachine.network.publicIpAddresses[0].ipAddress')
-	echo "IP Address of VM is: ${ip}"
+	
 	if [[ -n ${PORTS} ]] ; then
 		IFS=' ' read -ra port_nums <<< "$PORTS"
 		for i in "${port_nums[@]}"
@@ -46,4 +46,6 @@ else
 		done
 		echo "Ports opened"
 	fi
+	echo "IP Address of VM is: ${ip}" | sed "s/\"//g"
+	echo "Log into your VM by SSH by using handle: adminsh@${ip}" | sed "s/\"//g"
 fi
