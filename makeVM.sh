@@ -29,7 +29,8 @@ else
 	fi
 	az group create --name $RG --location westus
 	echo "Resource group created"
-	if [ ! -d "~/.ssh" ] || [ -z "$(ls -A ~/.ssh)" ] ; then
+	echo "Creating VM (this may take a while)"
+	if [ -z "$(ls -A ~/.ssh)" ] ; then
 		echo "generating SSH keys"
 		az vm create -n $NAME -g $RG --admin-username "adminsh" --image $IMAGE --generate-ssh-keys || exit 1
 	else
