@@ -1,13 +1,20 @@
 #!/bin/bash
 
 
-RES_GROUP=""
-REG_NAME=""
 
-GIT_REPO=""
+while getopts "g:n:r:p:d" arg; do 
+	case $arg in
+		g) RES_GROUP=${OPTARG};;
+		n) REG_NAME=${OPTARG};;
+		r) GIT_REPO=${OPTARG};;
+		p) GIT_PAT=${OPTARG};;
+		d) DELETE=true;;
+	esac
+done
+
+
 IFS='/' read -ra git_name <<< "$GIT_REPO"
-#DIR_NAME=$(echo ${git_name[@]: -1} | sed "s/.git//g")
-GIT_PAT=""
+REPO_NAME=$(echo ${git_name[@]: -1} | sed "s/.git//g")
 
 if [ $(az group exists -n $RES_GROUP) = false ] ; then
 	az group create --name $RES_GROUP --location westus
@@ -18,8 +25,6 @@ az acr create -g $RES_GROUP -n $REG_NAME --sku Basic
 az acr login -n $REG_NAME
 echo "Registry Created"
 
-LOG_IN="$REG_NAME.azurecr.io"
-REPO_NAME=""
 
 echo "Creating Task"
 az acr task create \
@@ -30,12 +35,15 @@ az acr task create \
     --file Dockerfile \
     --git-access-token $GIT_PAT
 
+
+LOG_IN="$REG_NAME.azurecr.io"
+
 echo "Now will run task"
 az acr task run --registry $REG_NAME --name acrrun
 echo "Running at: $LOG_IN"
 
 # Get latest tags of image
-# Make web app now which runs image (web app acts like container)
+# Make web app now which runs image (make this optional)
 # Add update web app option
 
 az appservice plan create -g $RES_GROUP -n WebContainerPlan --is-linux
