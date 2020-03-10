@@ -12,6 +12,7 @@ while getopts "g:n:r:p:d" arg; do
 	esac
 done
 
+az login
 
 IFS='/' read -ra git_name <<< "$GIT_REPO"
 REPO_NAME=$(echo ${git_name[@]: -1} | sed "s/.git//g")
